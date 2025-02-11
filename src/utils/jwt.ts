@@ -1,13 +1,16 @@
 import jwt from 'jsonwebtoken'
-import { jwtSecret } from '../config/db.config'
+import { jwtKeys } from '../config/db.config'
 
 export const generateToken = (payload: object): string => {
-  return jwt.sign(payload, jwtSecret, { expiresIn: '24h' })
+  return jwt.sign(payload, jwtKeys.privateKey, {
+    expiresIn: '24h',
+    algorithm: 'RS256'
+  })
 }
 
 export const verifyToken = (token: string): any => {
   try {
-    return jwt.verify(token, jwtSecret)
+    return jwt.verify(token, jwtKeys.publicKey, { algorithms: ['RS256'] })
   } catch (error) {
     return null
   }
