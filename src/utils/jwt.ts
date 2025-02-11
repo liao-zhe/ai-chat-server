@@ -1,3 +1,4 @@
+// 生成和校验token
 import jwt from 'jsonwebtoken'
 import { jwtKeys } from '../config/db.config'
 
