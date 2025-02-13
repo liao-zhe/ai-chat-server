@@ -1,20 +1,48 @@
 import Koa from 'koa'
-import Router from 'koa-router'
 import bodyParser from 'koa-bodyparser'
+import authRouter from './routes/auth'
+import dotenv from 'dotenv'
 
+// 加载环境变量
+dotenv.config()
+
+// 创建 Koa 实例
 const app = new Koa()
 
-// 使用第三方中间件解析json和urlencoded数据
+// 全局错误处理中间件
+app.use(async (ctx, next) => {
+  try {
+    await next()
+  } catch (err: any) {
+    console.error('Server Error:', err)
+    ctx.status = err.status || 500
+    ctx.body = {
+      success: false,
+      message: err.message || '服务器内部错误'
+    }
+  }
+})
+
+// 注册中间件
 app.use(bodyParser())
 
-const router = new Router()
+// 注册路由
+app.use(authRouter.routes())
+app.use(authRouter.allowedMethods())
 
-router.get('/', ctx => {
-  ctx.body = 'Hello World'
+// 未匹配路由处理
+app.use(async (ctx) => {
+  ctx.status = 404
+  ctx.body = {
+    success: false,
+    message: '接口不存在'
+  }
 })
 
-app.use(router.routes())
-
-app.listen(3000, () => {
-  console.log('Server is running on port 3000~🚀')
+// 启动服务器
+const PORT = process.env.PORT || 3000
+app.listen(PORT, () => {
+  console.log(`🚀 Server is running on http://localhost:${PORT}`)
 })
+
+export default app
